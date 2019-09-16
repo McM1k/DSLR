@@ -3,7 +3,6 @@ mod plot;
 mod student;
 
 use std::env;
-use parser;
 
 fn main() {
     let filename = env::args()

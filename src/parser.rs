@@ -3,12 +3,12 @@ use std::fs::File;
 use crate::student::Student;
 
 pub fn get_file_content(filename: String) -> Vec<Student> {
-    let csv = csv::Reader::from_path(filename).expect("cannot read csv");
-    let mut reader = csv::Reader::from_reader(csv);
+    let mut csv = csv::Reader::from_path(filename).expect("cannot read csv");
+//    let mut reader = csv::Reader::from_reader(csv);
 
     let mut data = Vec::new();
 
-    for line in reader.records() {
+    for line in csv.records() {
         let sr = line.expect("Cannot parse one of the lines");
         let tokens = sr.iter().map(|tk| tk.to_string()).collect();
         data.push(Student::my_deserialize(tokens));
