@@ -6,5 +6,4 @@ edition = "2018"
 
 [dependencies]
 csv = "1.1.1"
-plotlib = "0.4.0"
 chrono = "0.4.9"

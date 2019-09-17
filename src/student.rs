@@ -2,6 +2,7 @@ use chrono::naive::NaiveDate;
 use chrono::Local;
 use std::fmt::Error;
 
+#[derive(Clone, Debug)]
 pub enum House {
     Ravenclaw,
     Slytherin,
@@ -9,18 +10,20 @@ pub enum House {
     Hufflepuff,
 }
 
+#[derive(Clone, Debug)]
 pub enum Hand {
     Left,
     Right,
 }
 
+#[derive(Clone, Debug)]
 pub struct Student {
     pub house: House,
     pub first_name: String,
     pub last_name: String,
     pub birthday: NaiveDate,
     pub best_hand: Hand,
-    pub arithmancy: f64,
+    pub arithmancy: f64, //.5
     pub astronomy: f64,
     pub herbology: f64,
     pub defense: f64,
@@ -32,7 +35,7 @@ pub struct Student {
     pub potions: f64,
     pub creatures: f64,
     pub charms: f64,
-    pub flying: f64,
+    pub flying: f64, //.17
 }
 
 //impl Deserialize for Student {
