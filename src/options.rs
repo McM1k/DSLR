@@ -16,8 +16,9 @@ pub enum Args {
 }
 
 pub fn get_opt() -> Args {
-    let matches = App::new("choipeaux v2.0")
-        .about("Train on data, provide plots, then choose a house for your student")
+    let matches = App::new("Choipeaux v2.0")
+        .author("gboudrie@student.42.fr")
+        .about("Train on data, provide plots, then choose a house for your student.")
         .arg(Arg::with_name("predict")
             .short("p")
             .long("predict")
