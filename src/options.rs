@@ -58,7 +58,7 @@ pub fn get_opt() -> Args {
                 _ => Visu::None,
             };
         }
-        args = Args::Train(matches.value_of("TRAINFILE").unwrap().to_string(), visu);
+        args = Args::Train(matches.value_of("TRAINFILE").unwrap_or("caca").to_string(), visu);
     }
 
     args

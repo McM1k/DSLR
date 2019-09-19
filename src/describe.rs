@@ -1,7 +1,8 @@
 use crate::student::Student;
 use std::fmt;
+use crate::select;
 
-struct FeatureData {
+pub struct FeatureData {
     pub count: usize,
     pub mean: f64,
     pub std: f64,
@@ -50,9 +51,8 @@ pub fn describe(students: Vec<Student>) {
     println!("{:11} : {}", "flying", flying);
 }
 
-fn get_feature_data(students: Vec<Student>, feature_fn: fn(&Student)->f64) -> FeatureData {
-    let mut values = feature_to_vec(students, feature_fn);
-    values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+pub fn get_feature_data(students: Vec<Student>, feature_fn: fn(&Student)->f64) -> FeatureData {
+    let values = select::with_sorted_grades(students, feature_fn);
     let quartiles = quartiles(values.clone());
 
     FeatureData {
@@ -67,18 +67,11 @@ fn get_feature_data(students: Vec<Student>, feature_fn: fn(&Student)->f64) -> Fe
     }
 }
 
-fn feature_to_vec(students: Vec<Student>, feature_fn: fn(&Student)->f64) -> Vec<f64> {
-    students
-        .iter()
-        .map(feature_fn)
-        .collect::<Vec<f64>>()
-}
-
-fn count(values: Vec<f64>) -> usize {
+pub fn count(values: Vec<f64>) -> usize {
     values.len()
 }
 
-fn mean(values: Vec<f64>) -> f64 { //moyenne
+pub fn mean(values: Vec<f64>) -> f64 { //moyenne
     let mut sum = 0.0;
     for value in values.clone() {
         sum += value;
@@ -86,7 +79,7 @@ fn mean(values: Vec<f64>) -> f64 { //moyenne
     sum / count(values) as f64
 }
 
-fn variance(values: Vec<f64>) -> f64 {
+pub fn variance(values: Vec<f64>) -> f64 {
     let mean = mean(values.clone());
     let sq_mean = mean * mean;
     let mut sum = 0.0;
@@ -98,11 +91,11 @@ fn variance(values: Vec<f64>) -> f64 {
     sum / count(values) as f64
 }
 
-fn std(values: Vec<f64>) -> f64 { //ecart-type
+pub fn std(values: Vec<f64>) -> f64 { //ecart-type
     variance(values).sqrt()
 }
 
-fn quartiles(values: Vec<f64>) -> (f64, f64, f64, f64, f64) {
+pub fn quartiles(values: Vec<f64>) -> (f64, f64, f64, f64, f64) {
     let count = count(values.clone());
     (values[0],
      values[count / 4],

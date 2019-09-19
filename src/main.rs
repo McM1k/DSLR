@@ -6,6 +6,10 @@ mod options;
 mod train;
 mod predict;
 mod new_student;
+mod select;
+
+extern crate strum;
+extern crate strum_macros;
 
 use std::env;
 use options::{Args, Visu, get_opt};

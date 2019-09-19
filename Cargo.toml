@@ -8,6 +8,6 @@ edition = "2018"
 csv = "1.1.1"
 plotlib = "0.4.0"
 chrono = "0.4.9"
-#structopt = "0.2.16"
-#clap = { version = "2.33", default-features = false }
 clap = "2.33.0"
+strum = "0.16.0"
+strum_macros = "0.16.0"

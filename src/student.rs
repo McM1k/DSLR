@@ -1,8 +1,9 @@
 use chrono::naive::NaiveDate;
 use chrono::Local;
 use std::fmt::Error;
+use strum_macros::EnumIter;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {
     Ravenclaw,
     Slytherin,
@@ -94,7 +95,7 @@ impl Student {
         str.parse::<f64>().expect("Cannot parse one value")
     }
 
-    fn which_birthday(date: String) -> NaiveDate {
+    pub fn which_birthday(date: String) -> NaiveDate {
         NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d").expect("Cannot parse date")
     }
 }
