@@ -45,7 +45,8 @@ pub fn get_opt() -> Args {
 
     let mut args = Args::Predict("".to_string());
     if matches.is_present("predict") {
-        args = Args::Predict(matches.value_of("TESTFILE").unwrap().to_string());
+        let filename = matches.value_of("predict").unwrap().to_string();
+        args = Args::Predict(filename);
     }
     else if matches.is_present("train") {
         let mut visu = Visu::None;
@@ -58,7 +59,8 @@ pub fn get_opt() -> Args {
                 _ => Visu::None,
             };
         }
-        args = Args::Train(matches.value_of("TRAINFILE").unwrap_or("caca").to_string(), visu);
+        let filename = matches.value_of("train").unwrap().to_string();
+        args = Args::Train(filename, visu);
     }
 
     args

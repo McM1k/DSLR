@@ -23,12 +23,12 @@ pub fn histogram(students: Vec<Student>) {
     feature_homogeneity(students, |s|s.runes),
     ];
 
-    let h = Histogram::from_slice(&data.clone(), Bins::Bounds(data))
+    let h = Histogram::from_slice(&data.clone(), Bins::Count(12))
         .style(&histogram::Style::new());
 
     let v = ContinuousView::new()
         .add(&h)
-        .y_label("variance of each feature");
+        .x_label("variance of each feature");
 
     Page::single(&v).save("histogram.svg");
 }
@@ -41,8 +41,8 @@ fn feature_homogeneity(students: Vec<Student>, feature_fn: fn(&Student)->f64) ->
             with_house(students.clone(), house), feature_fn);
         vec.push(variance(grades.clone()) + mean(grades));
     }
-
-    variance(vec)
+    vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    range_minmax(vec)
 }
 
 pub fn scatter(students: Vec<Student>) {

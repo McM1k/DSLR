@@ -95,6 +95,11 @@ pub fn std(values: Vec<f64>) -> f64 { //ecart-type
     variance(values).sqrt()
 }
 
+pub fn range_minmax(values: Vec<f64>) -> f64 {
+    let (min, _, _, _, max) = quartiles(values);
+    max - min
+}
+
 pub fn quartiles(values: Vec<f64>) -> (f64, f64, f64, f64, f64) {
     let count = count(values.clone());
     (values[0],
