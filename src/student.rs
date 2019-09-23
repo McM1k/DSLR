@@ -5,9 +5,9 @@ use strum_macros::EnumIter;
 
 #[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {
-    Ravenclaw,
-    Slytherin,
     Gryffindor,
+    Slytherin,
+    Ravenclaw,
     Hufflepuff,
 }
 
