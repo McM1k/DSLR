@@ -2,6 +2,7 @@ use chrono::naive::NaiveDate;
 use chrono::Local;
 use std::fmt::Error;
 use strum_macros::EnumIter;
+use plotlib::style::Marker;
 
 #[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {
@@ -11,10 +12,84 @@ pub enum House {
     Hufflepuff,
 }
 
+impl House {
+    pub fn colour(&self) -> &str {
+        match self {
+            House::Gryffindor => "#DD3355",
+            House::Slytherin => "#33DD55",
+            House::Ravenclaw => "#3355DD",
+            House::Hufflepuff => "#DDBB33",
+        }
+    }
+
+    pub fn marker(&self) -> Marker {
+        match self {
+            House::Gryffindor => Marker::Square,
+            House::Slytherin => Marker::Cross,
+            House::Ravenclaw => Marker::Circle,
+            House::Hufflepuff => Marker::Circle,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Hand {
     Left,
     Right,
+}
+
+#[derive(Clone, Debug, EnumIter, PartialEq)]
+pub enum Features {
+    Arithmancy,
+    Astronomy,
+    Charms,
+    Creatures,
+    Defense,
+    Divination,
+    Flying,
+    Herbology,
+    History,
+    Muggle,
+    Potions,
+    Runes,
+    Transfiguration,
+}
+
+impl Features {
+    pub fn func(&self) -> fn(&Student)->f64 {
+        match self {
+            Features::Arithmancy => |s|s.arithmancy,
+            Features::Astronomy => |s|s.astronomy,
+            Features::Charms => |s|s.charms,
+            Features::Creatures => |s|s.creatures,
+            Features::Defense => |s|s.defense,
+            Features::Divination => |s|s.divination,
+            Features::Flying => |s|s.flying,
+            Features::Herbology => |s|s.herbology,
+            Features::History => |s|s.history,
+            Features::Muggle => |s|s.muggle,
+            Features::Potions => |s|s.potions,
+            Features::Runes => |s|s.runes,
+            Features::Transfiguration => |s|s.transfiguration,
+        }
+    }
+    pub fn str(&self) -> &str {
+        match self {
+            Features::Arithmancy => "Arithmancy",
+            Features::Astronomy => "Astronomy",
+            Features::Charms => "Charms",
+            Features::Creatures => "Care of magical creatures",
+            Features::Defense => "Defense against the dark arts",
+            Features::Divination => "Divination",
+            Features::Flying => "Flying",
+            Features::Herbology => "Herbology",
+            Features::History => "History of magic",
+            Features::Muggle => "Muggle studies",
+            Features::Potions => "Potions",
+            Features::Runes => "Ancient Runes",
+            Features::Transfiguration => "Transfiguration",
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

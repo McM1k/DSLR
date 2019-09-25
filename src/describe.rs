@@ -1,6 +1,7 @@
-use crate::student::Student;
+use crate::student::{Student, Features};
 use std::fmt;
 use crate::select;
+use crate::student::Features::*;
 
 pub struct FeatureData {
     pub count: usize,
@@ -21,19 +22,19 @@ impl fmt::Display for FeatureData {
 
 
 pub fn describe(students: Vec<Student>) {
-    let arithmancy = get_feature_data(students.clone(), |s|s.arithmancy);
-    let astronomy = get_feature_data(students.clone(), |s|s.astronomy);
-    let herbology = get_feature_data(students.clone(), |s|s.herbology);
-    let defense = get_feature_data(students.clone(), |s|s.defense);
-    let divination = get_feature_data(students.clone(), |s|s.divination);
-    let muggle = get_feature_data(students.clone(), |s|s.muggle);
-    let runes = get_feature_data(students.clone(), |s|s.runes);
-    let history = get_feature_data(students.clone(), |s|s.history);
-    let transfig = get_feature_data(students.clone(), |s|s.transfiguration);
-    let potions = get_feature_data(students.clone(), |s|s.potions);
-    let creatures = get_feature_data(students.clone(), |s|s.creatures);
-    let charms = get_feature_data(students.clone(), |s|s.charms);
-    let flying = get_feature_data(students.clone(), |s|s.flying);
+    let arithmancy = get_feature_data(students.clone(),Arithmancy);
+    let astronomy = get_feature_data(students.clone(), Astronomy);
+    let herbology = get_feature_data(students.clone(), Herbology);
+    let defense = get_feature_data(students.clone(), Defense);
+    let divination = get_feature_data(students.clone(), Divination);
+    let muggle = get_feature_data(students.clone(), Muggle);
+    let runes = get_feature_data(students.clone(), Runes);
+    let history = get_feature_data(students.clone(), History);
+    let transfig = get_feature_data(students.clone(), Transfiguration);
+    let potions = get_feature_data(students.clone(), Potions);
+    let creatures = get_feature_data(students.clone(), Creatures);
+    let charms = get_feature_data(students.clone(), Charms);
+    let flying = get_feature_data(students.clone(), Flying);
 
     println!("{:11} : {:>6}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}", "discipline", "count", "mean", "std dev", "minimum", "1st quart", "2nd quart", "3rd quart", "maximum");
     println!("{:11} : {}", "arithmancy", arithmancy);
@@ -51,8 +52,8 @@ pub fn describe(students: Vec<Student>) {
     println!("{:11} : {}", "flying", flying);
 }
 
-pub fn get_feature_data(students: Vec<Student>, feature_fn: fn(&Student)->f64) -> FeatureData {
-    let values = select::with_sorted_grades(students, feature_fn);
+pub fn get_feature_data(students: Vec<Student>, feature: Features) -> FeatureData {
+    let values = select::with_sorted_grades(students, feature);
     let quartiles = quartiles(values.clone());
 
     FeatureData {
