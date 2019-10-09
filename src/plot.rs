@@ -3,31 +3,62 @@ use crate::student::House::*;
 use crate::select::*;
 use strum::IntoEnumIterator;
 use crate::student::Features::*;
-use std::alloc::handle_alloc_error;
-use pyo3::prelude::*;
-use pyo3::types::IntoPyDict;
+extern crate cpython;
+use cpython::{Python, PyDict, PyResult};
 
-pub fn histogram(students: Vec<Student>) {
+pub fn histogram(filename: &str) {
     let gil = Python::acquire_gil();
     let py = gil.python();
-    let px = py.import("plotly.express");
-        //https://plot.ly/python/splom/
+    let locals = PyDict::new(py);
+    locals.set_item(py, "plt", py.import("pyplot").expect("Cannot import pyplot")).expect("Cannot assign pyplot");
+    locals.set_item(py, "pd", py.import("pandas").expect("Cannot import pandas")).expect("Cannot assign pandas");
+    locals.set_item(py, "sns", py.import("seaborn").expect("Cannot import seaborn")).expect("Cannot assign seaborn");
+    locals.set_item(py, "file", filename).expect("Cannot give the file to python");
+    let code = "\
+    data = pd.read_csv(file)\
+    pal = dict(Gryffindor=\"red\", Hufflepuff=\"yellow\", Slytherin=\"green\", Ravenclaw=\"blue\")\
+    g = sns.PairGrid(data,\
+        vars=[\
+        \"Arithmancy\",\
+        \"Astronomy\",\
+        \"Herbology\",\
+        \"Defense Against the Dark Arts\",\
+        \"Divination\",\
+        \"Muggle Studies\",\
+        \"Ancient Runes\",\
+        \"History of Magic\",\
+        \"Transfiguration\",\
+        \"Potions\",\
+        \"Care of Magical Creatures\",\
+        \"Charms\",\
+        \"Flying\"\
+        ],\
+        hue=\"Hogwarts House\",\
+        palette=pal,\
+        diag_kind=\"hist\")\
+    g.map_lower(sns.lmplot)\
+    g.map_diag(sns.distplot)\
+    g.map_upper(sns.kdeplot)\
+    g.add_legend()\
+    plt.savefig(\"pair.svg\", format=\"svg\")\
+    ";
+    py.run(code, None, Some(&locals));
 }
 
-fn get_histos_feature(students: Vec<Student>, feature: Features, area: Root) {
-    for house in House::IntoEnumIterator::iter() {
-        let grades = with_sorted_grades(
-            with_house(students.clone(), house.clone()),
-            feature.clone()
-        );
-
-        let h =
-
-    }
+//fn get_histos_feature(students: Vec<Student>, feature: Features, area: Root) {
+//    for house in House::IntoEnumIterator::iter() {
+//        let grades = with_sorted_grades(
+//            with_house(students.clone(), house.clone()),
+//            feature.clone()
+//        );
+//
+//        let h =
+//
+//    }
 //    let label = format!("grade repartition in {}", feature.str());
 //    view_houses(vec)
 //        .x_label(label.as_str())
-}
+//}
 //
 //pub fn scatter(students: Vec<Student>) {
 //    let ft1 = Defense;

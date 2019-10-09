@@ -19,12 +19,12 @@ fn main() {
 
     match args {
         Args::Train(filename, visu) => {
-            let data = parser::get_train_file_content(filename);
+            let data = parser::get_train_file_content(filename.clone());
             match visu {
                 Visu::Describe => describe::describe(data.clone()),
-                Visu::Histogram => plot::histogram(data.clone()),
-                Visu::Scatter => plot::scatter(data.clone()),
-                Visu::Pair => plot::pair(data.clone()),
+                Visu::Histogram => plot::histogram(&filename),
+                Visu::Scatter => ()/*plot::scatter(data.clone())*/,
+                Visu::Pair => ()/*plot::pair(data.clone())*/,
                 Visu::None => (),
             }
 

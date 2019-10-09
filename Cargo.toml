@@ -11,4 +11,10 @@ chrono = "0.4.9"
 clap = "2.33.0"
 strum = "0.16.0"
 strum_macros = "0.16.0"
-pyo3 = "0.8.0"
+cpython = "0.3.0"
+
+[target.x86_64-apple-darwin]
+rustflags = [
+  "-C", "link-arg=-undefined",
+  "-C", "link-arg=dynamic_lookup",
+]
