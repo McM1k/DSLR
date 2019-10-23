@@ -17,6 +17,11 @@ pub fn get_train_file_content(filename: String) -> Vec<Student> {
     data
 }
 
+
+//pub fn get_data_from_csv(filename: String) -> DataFrame {
+  //  DataFrame::read_csv(&filename, ',')
+//}
+
 pub fn get_test_file_content(filename: String) -> Vec<NewStudent> {
     Vec::new() //TODO
 }

@@ -98,6 +98,7 @@ pub fn pair(filename: &str) {
     g.map_diag(plt.scatter, alpha=0.6)\
     g.add_legend()\
     plt.savefig(\"pair.svg\", format=\"svg\")\
+    plt.show()\
     ";
     py.run(code, None, Some(&locals));
     println!("Wrote pair.svg!");
