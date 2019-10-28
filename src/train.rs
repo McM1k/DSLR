@@ -1,21 +1,34 @@
 use crate::student::{Student, Hand, House, Features};
+use crate::predict::*;
 
 pub fn train(students: Vec<Student>) {
-    //TODO
+    let mut thetas = vec![0.0; 14];
+    let mut weights = vec![thetas.clone(); 4];
+    let epochs = 10_000;
+
+    for epoch in 0..epochs {
+        //TODO : plot loss
+
+        let mut k = 0;
+        for house in House {
+            weights[k] = thetas_by_epoch(students.clone(), house.clone(), weights[k]);
+            k += 1;
+        }
+    }
+
+    //TODO : write weights in weights.csv
 }
 
-pub fn sigmoid(z: f64) -> f64 {
-    1.0 / (1.0 + exp(z * -1.0))
-}
+fn thetas_by_epoch(students: Vec<Student>, house: House, thetas: Vec<f64>) -> Vec<f64> {
+    let mut tmp = thetas.clone();
+    tmp[0] += deriv(thetas, students.clone(), house, |_s| 1.0);
 
-pub fn h(thetas: Vec<f64>, student: Student) -> f64 {
-    let mut result = thetas[0];
     let mut i = 1;
     for ft in Features {
-        result = result + (ft.func()(&student) * thetas[i]);
-        i = i + 1;
+        tmp[i] += deriv(thetas, students.clone(), house, ft.func());
+        i += 1;
     }
-    sigmoid(result)
+    tmp
 }
 
 pub fn loss(thetas: Vec<f64>, students: Vec<Student>, house: House) -> f64 {
@@ -31,7 +44,7 @@ pub fn loss(thetas: Vec<f64>, students: Vec<Student>, house: House) -> f64 {
     (-1.0 / m as f64) * sum
 }
 
-pub fn deriv(thetas: Vec<f64>, students: Vec<Student>, house: House, ft: Features) -> f64 {
+pub fn deriv(&thetas: Vec<f64>, students: Vec<Student>, &house: House, func: fn(&Student)->f64) -> f64 {
     let m = students.len();
     let mut sum = 0.0;
     for x in students {
@@ -39,7 +52,7 @@ pub fn deriv(thetas: Vec<f64>, students: Vec<Student>, house: House, ft: Feature
             house => 1.0,
             _ => 0.0,
         };
-        sum = sum + (h(thetas, student) - y) * ft.func()(&x);
+        sum = sum + (h(thetas, student) - y) * func()(&x);
     }
     (-1.0 / m as f64) * sum
 }
