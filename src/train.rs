@@ -1,5 +1,6 @@
 use crate::student::{Student, Hand, House, Features};
 use crate::predict::*;
+use crate::strum::IntoEnumIterator;
 
 pub fn train(students: Vec<Student>) {
     let mut thetas = vec![0.0; 14];
@@ -10,8 +11,8 @@ pub fn train(students: Vec<Student>) {
         //TODO : plot loss
 
         let mut k = 0;
-        for house in House {
-            weights[k] = thetas_by_epoch(students.clone(), house.clone(), weights[k]);
+        for house in House::iter() {
+            weights[k] = thetas_by_epoch(&students, &house, &weights[k]);
             k += 1;
         }
     }
@@ -19,40 +20,40 @@ pub fn train(students: Vec<Student>) {
     //TODO : write weights in weights.csv
 }
 
-fn thetas_by_epoch(students: Vec<Student>, house: House, thetas: Vec<f64>) -> Vec<f64> {
+fn thetas_by_epoch(students: &Vec<Student>, house: &House, thetas: &Vec<f64>) -> Vec<f64> {
     let mut tmp = thetas.clone();
-    tmp[0] += deriv(thetas, students.clone(), house, |_s| 1.0);
+    tmp[0] += deriv(&thetas, &students, &house, |_s| 1.0);
 
     let mut i = 1;
-    for ft in Features {
-        tmp[i] += deriv(thetas, students.clone(), house, ft.func());
+    for ft in Features::iter() {
+        tmp[i] += deriv(&thetas, &students, &house, ft.func());
         i += 1;
     }
     tmp
 }
 
-pub fn loss(thetas: Vec<f64>, students: Vec<Student>, house: House) -> f64 {
+pub fn loss(thetas: &Vec<f64>, students: &Vec<Student>, house: &House) -> f64 {
     let m = students.len();
     let mut sum= 0.0;
     for x in students {
-        let y = match student.house {
+        let y = match &x.house {
             house => 1.0,
             _ => 0.0,
         };
-        sum += y * log(h(thetas, x)) + (1.0 - y) * log(1.0 - h(thetas, x))
+        sum += y * (h(&thetas, &x)).log10() + (1.0 - y) * (1.0 - h(&thetas, &x)).log10()
     }
     (-1.0 / m as f64) * sum
 }
 
-pub fn deriv(&thetas: Vec<f64>, students: Vec<Student>, &house: House, func: fn(&Student)->f64) -> f64 {
+pub fn deriv(thetas: &Vec<f64>, students: &Vec<Student>, house: &House, func: fn(&Student)->f64) -> f64 {
     let m = students.len();
     let mut sum = 0.0;
     for x in students {
-        let y = match student.house {
+        let y = match &x.house {
             house => 1.0,
             _ => 0.0,
         };
-        sum = sum + (h(thetas, student) - y) * func()(&x);
+        sum = sum + (h(&thetas, &x) - y) * func(&x);
     }
     (-1.0 / m as f64) * sum
 }
