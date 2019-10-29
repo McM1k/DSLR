@@ -92,20 +92,38 @@ pub fn variance(values: Vec<f64>) -> f64 {
     sum / count(values) as f64
 }
 
-pub fn std(values: Vec<f64>) -> f64 { //ecart-type
+pub fn std(values: Vec<f64>) -> f64 { //ecart-type == standard variation
     variance(values).sqrt()
 }
 
-pub fn range_minmax(values: Vec<f64>) -> f64 {
-    let (min, _, _, _, max) = quartiles(values);
+pub fn get_minmax(values: &Vec<f64>) -> (f64, f64) {
+    let (mut min, mut max) = (0.0, 0.0);
+
+    for value in values {
+        if max < *value {
+            max = *value;
+        }
+    }
+    min = max;
+    for value in values {
+        if min > *value {
+            min = *value;
+        }
+    }
+
+    (min, max)
+}
+
+pub fn range_minmax(sorted: Vec<f64>) -> f64 {
+    let (min, _, _, _, max) = quartiles(sorted);
     max - min
 }
 
-pub fn quartiles(values: Vec<f64>) -> (f64, f64, f64, f64, f64) {
-    let count = count(values.clone());
-    (values[0],
-     values[count / 4],
-     values[count / 2],
-     values[count * 3 / 4],
-     values[count - 1])
+pub fn quartiles(sorted: Vec<f64>) -> (f64, f64, f64, f64, f64) {
+    let count = count(sorted.clone());
+    (sorted[0],
+     sorted[count / 4],
+     sorted[count / 2],
+     sorted[count * 3 / 4],
+     sorted[count - 1])
 }

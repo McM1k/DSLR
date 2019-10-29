@@ -144,6 +144,24 @@ impl Student {
         }
     }
 
+    pub fn set_feature(& mut self, value: f64, ft: &Features) {
+        match ft {
+            Features::Arithmancy => {self.arithmancy = value},
+            Features::Astronomy => {self.astronomy = value},
+            Features::Charms => {self.charms = value},
+            Features::Creatures => {self.creatures = value},
+            Features::Defense => {self.defense = value},
+            Features::Divination => {self.divination = value},
+            Features::Flying => {self.flying = value},
+            Features::Herbology => {self.herbology = value},
+            Features::History => {self.history = value},
+            Features::Muggle => {self.muggle = value},
+            Features::Potions => {self.potions = value},
+            Features::Runes => {self.runes = value},
+            Features::Transfiguration => {self.transfiguration = value},
+        }
+    }
+
     pub fn which_house(house: String) -> House {
         match house.as_str() {
             "Ravenclaw" => House::Ravenclaw,

@@ -47,6 +47,33 @@ fn get_histos_feature(students: Vec<Student>, feature: Features) -> Vec<Histogra
     vec
 }
 
+pub fn plot_loss(data: &Vec<Vec<(f64, f64)>>) {
+    let gryf = Scatter::from_slice(&data[0])
+        .style(&scatter::Style::new()
+            .colour(Gryffindor.colour()));
+    let slyt = Scatter::from_slice(&data[1])
+        .style(&scatter::Style::new()
+            .colour(Slytherin.colour()));
+    let rave = Scatter::from_slice(&data[2])
+        .style(&scatter::Style::new()
+            .colour(Ravenclaw.colour()));
+    let huff = Scatter::from_slice(&data[3])
+        .style(&scatter::Style::new()
+            .colour(Hufflepuff.colour()));
+
+    let v = ContinuousView::new()
+        .add(&gryf)
+        .add(&slyt)
+        .add(&rave)
+        .add(&huff)
+        .x_label("loss")
+        .y_label("epochs")
+        .x_range(0.0, 10.0); //TODO
+
+    Page::single(&v).save("loss.svg").expect("Unable to generate loss.svg");
+    println!("Wrote loss.svg!");
+}
+
 pub fn scatter(students: Vec<Student>) {
     let ft1 = Defense;
     let ft2 = Astronomy;
