@@ -1,8 +1,6 @@
 use chrono::naive::NaiveDate;
-use chrono::Local;
-use std::fmt::Error;
-use strum_macros::EnumIter;
 use plotlib::style::Marker;
+use strum_macros::EnumIter;
 
 #[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {
@@ -56,21 +54,21 @@ pub enum Features {
 }
 
 impl Features {
-    pub fn func(&self) -> fn(&Student)->f64 {
+    pub fn func(&self) -> fn(&Student) -> f64 {
         match self {
-            Features::Arithmancy => |s|s.arithmancy,
-            Features::Astronomy => |s|s.astronomy,
-            Features::Charms => |s|s.charms,
-            Features::Creatures => |s|s.creatures,
-            Features::Defense => |s|s.defense,
-            Features::Divination => |s|s.divination,
-            Features::Flying => |s|s.flying,
-            Features::Herbology => |s|s.herbology,
-            Features::History => |s|s.history,
-            Features::Muggle => |s|s.muggle,
-            Features::Potions => |s|s.potions,
-            Features::Runes => |s|s.runes,
-            Features::Transfiguration => |s|s.transfiguration,
+            Features::Arithmancy => |s| s.arithmancy,
+            Features::Astronomy => |s| s.astronomy,
+            Features::Charms => |s| s.charms,
+            Features::Creatures => |s| s.creatures,
+            Features::Defense => |s| s.defense,
+            Features::Divination => |s| s.divination,
+            Features::Flying => |s| s.flying,
+            Features::Herbology => |s| s.herbology,
+            Features::History => |s| s.history,
+            Features::Muggle => |s| s.muggle,
+            Features::Potions => |s| s.potions,
+            Features::Runes => |s| s.runes,
+            Features::Transfiguration => |s| s.transfiguration,
         }
     }
     pub fn str(&self) -> &str {
@@ -140,25 +138,25 @@ impl Student {
             potions: Student::parse_f64(tokens[15].clone()),
             creatures: Student::parse_f64(tokens[16].clone()),
             charms: Student::parse_f64(tokens[17].clone()),
-            flying: Student::parse_f64(tokens[18].clone())
+            flying: Student::parse_f64(tokens[18].clone()),
         }
     }
 
-    pub fn set_feature(& mut self, value: f64, ft: &Features) {
+    pub fn set_feature(&mut self, value: f64, ft: &Features) {
         match ft {
-            Features::Arithmancy => {self.arithmancy = value},
-            Features::Astronomy => {self.astronomy = value},
-            Features::Charms => {self.charms = value},
-            Features::Creatures => {self.creatures = value},
-            Features::Defense => {self.defense = value},
-            Features::Divination => {self.divination = value},
-            Features::Flying => {self.flying = value},
-            Features::Herbology => {self.herbology = value},
-            Features::History => {self.history = value},
-            Features::Muggle => {self.muggle = value},
-            Features::Potions => {self.potions = value},
-            Features::Runes => {self.runes = value},
-            Features::Transfiguration => {self.transfiguration = value},
+            Features::Arithmancy => self.arithmancy = value,
+            Features::Astronomy => self.astronomy = value,
+            Features::Charms => self.charms = value,
+            Features::Creatures => self.creatures = value,
+            Features::Defense => self.defense = value,
+            Features::Divination => self.divination = value,
+            Features::Flying => self.flying = value,
+            Features::Herbology => self.herbology = value,
+            Features::History => self.history = value,
+            Features::Muggle => self.muggle = value,
+            Features::Potions => self.potions = value,
+            Features::Runes => self.runes = value,
+            Features::Transfiguration => self.transfiguration = value,
         }
     }
 
@@ -180,8 +178,7 @@ impl Student {
         }
     }
 
-    fn parse_f64(str: String) -> f64
-    {
+    fn parse_f64(str: String) -> f64 {
         if str.eq(&"".to_string()) {
             return 0.0;
         }

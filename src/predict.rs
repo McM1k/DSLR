@@ -1,6 +1,6 @@
-use crate::new_student::{NewStudent};
-use crate::student::{House, Hand, Student, Features};
+use crate::new_student::NewStudent;
 use crate::strum::IntoEnumIterator;
+use crate::student::{Features, House, Student};
 
 pub fn predict(students: Vec<NewStudent>) {
     //TODO
@@ -14,8 +14,8 @@ pub fn h(thetas: &Vec<f64>, student: &Student) -> f64 {
     let mut result = thetas[0];
     let mut i = 1;
     for ft in Features::iter() {
-        result = result + (ft.func()(&student) * thetas[i]);
-        i = i + 1;
+        result += ft.func()(&student) * thetas[i];
+        i += 1;
     }
     sigmoid(result)
 }

@@ -1,7 +1,5 @@
-use csv::StringRecord;
-use std::fs::File;
-use crate::student::Student;
 use crate::new_student::NewStudent;
+use crate::student::Student;
 
 pub fn get_train_file_content(filename: String) -> Vec<Student> {
     let mut csv = csv::Reader::from_path(filename).expect("cannot read csv");
@@ -17,9 +15,8 @@ pub fn get_train_file_content(filename: String) -> Vec<Student> {
     data
 }
 
-
 //pub fn get_data_from_csv(filename: String) -> DataFrame {
-  //  DataFrame::read_csv(&filename, ',')
+//  DataFrame::read_csv(&filename, ',')
 //}
 
 pub fn get_test_file_content(filename: String) -> Vec<NewStudent> {

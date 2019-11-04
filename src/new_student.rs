@@ -1,7 +1,5 @@
-use chrono::naive::NaiveDate;
-use chrono::Local;
-use std::fmt::Error;
 use crate::student::Hand;
+use chrono::naive::NaiveDate;
 
 #[derive(Clone, Debug)]
 pub struct NewStudent {

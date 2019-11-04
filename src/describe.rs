@@ -1,7 +1,7 @@
-use crate::student::{Student, Features};
-use std::fmt;
 use crate::select;
 use crate::student::Features::*;
+use crate::student::{Features, Student};
+use std::fmt;
 
 pub struct FeatureData {
     pub count: usize,
@@ -16,13 +16,16 @@ pub struct FeatureData {
 
 impl fmt::Display for FeatureData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:>6}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}", self.count, self.mean, self.std, self.min, self.q1, self.q2, self.q3, self.max)
+        write!(
+            f,
+            "{:>6}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}  {:>10.4}",
+            self.count, self.mean, self.std, self.min, self.q1, self.q2, self.q3, self.max
+        )
     }
 }
 
-
 pub fn describe(students: Vec<Student>) {
-    let arithmancy = get_feature_data(students.clone(),Arithmancy);
+    let arithmancy = get_feature_data(students.clone(), Arithmancy);
     let astronomy = get_feature_data(students.clone(), Astronomy);
     let herbology = get_feature_data(students.clone(), Herbology);
     let defense = get_feature_data(students.clone(), Defense);
@@ -36,7 +39,18 @@ pub fn describe(students: Vec<Student>) {
     let charms = get_feature_data(students.clone(), Charms);
     let flying = get_feature_data(students.clone(), Flying);
 
-    println!("{:11} : {:>6}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}", "discipline", "count", "mean", "std dev", "minimum", "1st quart", "2nd quart", "3rd quart", "maximum");
+    println!(
+        "{:11} : {:>6}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
+        "discipline",
+        "count",
+        "mean",
+        "std dev",
+        "minimum",
+        "1st quart",
+        "2nd quart",
+        "3rd quart",
+        "maximum"
+    );
     println!("{:11} : {}", "arithmancy", arithmancy);
     println!("{:11} : {}", "astronomy", astronomy);
     println!("{:11} : {}", "herbology", herbology);
@@ -72,7 +86,8 @@ pub fn count(values: Vec<f64>) -> usize {
     values.len()
 }
 
-pub fn mean(values: Vec<f64>) -> f64 { //moyenne
+pub fn mean(values: Vec<f64>) -> f64 {
+    //moyenne
     let mut sum = 0.0;
     for value in values.clone() {
         sum += value;
@@ -92,13 +107,15 @@ pub fn variance(values: Vec<f64>) -> f64 {
     sum / count(values) as f64
 }
 
-pub fn std(values: Vec<f64>) -> f64 { //ecart-type == standard variation
+pub fn std(values: Vec<f64>) -> f64 {
+    //ecart-type == standard variation
     variance(values).sqrt()
 }
 
 pub fn get_minmax(values: &Vec<f64>) -> (f64, f64) {
-    let (mut min, mut max) = (0.0, 0.0);
+    let (mut min, mut max);
 
+    max = 0.0;
     for value in values {
         if max < *value {
             max = *value;
@@ -121,9 +138,11 @@ pub fn range_minmax(sorted: Vec<f64>) -> f64 {
 
 pub fn quartiles(sorted: Vec<f64>) -> (f64, f64, f64, f64, f64) {
     let count = count(sorted.clone());
-    (sorted[0],
-     sorted[count / 4],
-     sorted[count / 2],
-     sorted[count * 3 / 4],
-     sorted[count - 1])
+    (
+        sorted[0],
+        sorted[count / 4],
+        sorted[count / 2],
+        sorted[count * 3 / 4],
+        sorted[count - 1],
+    )
 }

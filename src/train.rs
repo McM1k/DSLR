@@ -1,39 +1,44 @@
-use crate::student::{Student, Hand, House, Features};
-use crate::predict::*;
-use crate::strum::IntoEnumIterator;
-use crate::select::feature_to_grades;
 use crate::describe::get_minmax;
 use crate::plot::plot_loss;
+use crate::predict::*;
+use crate::select::feature_to_grades;
+use crate::strum::IntoEnumIterator;
+use crate::student::{Features, House, Student};
 use std::fs::File;
-use std::path::Path;
 use std::io::Write;
-use std::intrinsics::write_bytes;
+use std::path::Path;
 
 pub fn train(students: Vec<Student>) {
-    let mut thetas = vec![0.0; 14];
+    let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
-    let epochs = 10;
+    let epochs = 10_000;
     let normed = feature_scaling(students);
     let mut loss_data = vec![Vec::new(); 4];
+    let mut percent = 0;
+    let mut part = epochs / 100;
 
     for epoch in 0..epochs {
-        let mut k = 0;
-        for house in House::iter() {
-            loss_data[k].push((loss(&thetas, &normed, &house), k as f64));
+        for (k, house) in House::iter().enumerate() {
+            if epoch % part == 0 || epoch < part * 3 {
+                if house == House::Gryffindor && epoch % (part * 5) == 0 {
+                    println!("training : {}%", percent);
+                    percent += 5;
+                }
+                loss_data[k].push((f64::from(epoch), loss(&weights[k], &normed, &house)));
+            }
             weights[k] = thetas_by_epoch(&normed, &house, &weights[k]);
-            k += 1;
         }
     }
-
     plot_loss(&loss_data);
     to_csv(weights);
 }
 
 fn to_csv(weights: Vec<Vec<f64>>) {
-    let mut content = format!("Index,th0,th1,th2,th3,th4,th5,th6,th7,th8,th9,th10,th11,th12,th13\n");
-    for i in 0..weights.len() {
+    let mut content =
+        "Index,th0,th1,th2,th3,th4,th5,th6,th7,th8,th9,th10,th11,th12,th13\n".to_string();
+    for (i, thetas) in weights.iter().enumerate() {
         content = format!("{}{}", content, i);
-        for th in weights[i].clone() {
+        for th in thetas.clone() {
             content = format!("{},{}", content, th);
         }
         content = format!("{}\n", content);
@@ -70,7 +75,10 @@ fn feature_scaling(students: Vec<Student>) -> Vec<Student> {
         let grades = feature_to_grades(students.clone(), ft.clone());
         let xrange = get_minmax(&grades);
         for i in 0..students.len() {
-            normed[i].set_feature((ft.func()(&students[i]) - xrange.0) / (xrange.1 - xrange.0), &ft)
+            normed[i].set_feature(
+                (ft.func()(&students[i]) - xrange.0) / (xrange.1 - xrange.0),
+                &ft,
+            )
         }
     }
 
@@ -91,26 +99,33 @@ fn thetas_by_epoch(students: &Vec<Student>, house: &House, thetas: &Vec<f64>) ->
 
 pub fn loss(thetas: &Vec<f64>, students: &Vec<Student>, house: &House) -> f64 {
     let m = students.len();
-    let mut sum= 0.0;
+    let mut sum = 0.0;
     for x in students {
-        let y = match &x.house {
-            house => 1.0,
-            _ => 0.0,
-        };
+        let y = is_good_house(&x, &house);
         sum += y * (h(&thetas, &x)).log10() + (1.0 - y) * (1.0 - h(&thetas, &x)).log10()
     }
     (-1.0 / m as f64) * sum
 }
 
-pub fn deriv(thetas: &Vec<f64>, students: &Vec<Student>, house: &House, func: fn(&Student)->f64) -> f64 {
+pub fn deriv(
+    thetas: &Vec<f64>,
+    students: &Vec<Student>,
+    house: &House,
+    func: fn(&Student) -> f64,
+) -> f64 {
     let m = students.len();
     let mut sum = 0.0;
     for x in students {
-        let y = match &x.house {
-            house => 1.0,
-            _ => 0.0,
-        };
-        sum = sum + (h(&thetas, &x) - y) * func(&x);
+        let y = is_good_house(&x, &house);
+        sum += (h(&thetas, &x) - y) * func(&x);
     }
     (-1.0 / m as f64) * sum
+}
+
+fn is_good_house(student: &Student, house: &House) -> f64 {
+    if student.house == *house {
+        1.0
+    } else {
+        0.0
+    }
 }
