@@ -20,14 +20,6 @@ pub fn get_opt() -> Args {
         .author("gboudrie@student.42.fr")
         .about("Train on data, provide plots, then choose a house for your student.")
         .arg(
-            Arg::with_name("FILE")
-                .value_name("FILE")
-                .help("The input file")
-                .takes_value(true)
-                .required(true)
-                .index(1),
-        )
-        .arg(
             Arg::with_name("predict")
                 .short("p")
                 .long("predict")
@@ -50,6 +42,14 @@ pub fn get_opt() -> Args {
                 .takes_value(true)
                 .conflicts_with_all(&["predict", "train"])
                 .possible_values(&["describe", "histogram", "scatter", "pair"]),
+        )
+        .arg(
+            Arg::with_name("FILE")
+                .value_name("FILE")
+                .help("The input file")
+                .takes_value(true)
+                .required(true)
+                .index(1),
         )
         .get_matches();
 

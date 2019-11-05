@@ -1,6 +1,7 @@
 use chrono::naive::NaiveDate;
 use plotlib::style::Marker;
 use strum_macros::EnumIter;
+use crate::student::House::Gryffindor;
 
 #[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {
@@ -142,6 +143,29 @@ impl Student {
         }
     }
 
+    pub fn deser_new(tokens: Vec<String>) -> Student {
+        Student {
+            house: Gryffindor,
+            first_name: tokens[2].clone(),
+            last_name: tokens[3].clone(),
+            birthday: Student::which_birthday(tokens[4].clone()),
+            best_hand: Student::which_hand(tokens[5].clone()),
+            arithmancy: Student::parse_f64(tokens[6].clone()),
+            astronomy: Student::parse_f64(tokens[7].clone()),
+            herbology: Student::parse_f64(tokens[8].clone()),
+            defense: Student::parse_f64(tokens[9].clone()),
+            divination: Student::parse_f64(tokens[10].clone()),
+            muggle: Student::parse_f64(tokens[11].clone()),
+            runes: Student::parse_f64(tokens[12].clone()),
+            history: Student::parse_f64(tokens[13].clone()),
+            transfiguration: Student::parse_f64(tokens[14].clone()),
+            potions: Student::parse_f64(tokens[15].clone()),
+            creatures: Student::parse_f64(tokens[16].clone()),
+            charms: Student::parse_f64(tokens[17].clone()),
+            flying: Student::parse_f64(tokens[18].clone()),
+        }
+    }
+
     pub fn set_feature(&mut self, value: f64, ft: &Features) {
         match ft {
             Features::Arithmancy => self.arithmancy = value,
@@ -178,7 +202,7 @@ impl Student {
         }
     }
 
-    fn parse_f64(str: String) -> f64 {
+    pub fn parse_f64(str: String) -> f64 {
         if str.eq(&"".to_string()) {
             return 0.0;
         }
