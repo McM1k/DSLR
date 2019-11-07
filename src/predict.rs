@@ -1,12 +1,53 @@
 use crate::strum::IntoEnumIterator;
 use crate::student::{Features, House, Student};
 use crate::parser::get_weights_file_content;
+use crate::student::House::{Gryffindor, Slytherin, Ravenclaw, Hufflepuff};
+use std::fs::File;
+use std::path::Path;
+use std::io::Write;
 
 pub fn predict(students: Vec<Student>) {
     let weights = get_weights_file_content();
+    let mut answers = Vec::new();
     for student in students {
         let mut scores = vec![0.0; 4];
-        //TODO calc scores, cmp scores, output good house
+        for k in House::iter().len() {
+            scores[k] = h(weights[k], &student);
+        }
+        answers.push(compare_scores(&scores));
+    }
+    write_csv(&answers)
+}
+
+fn write_csv(answers: &Vec<House>) {
+    let mut content = "Index, Hogwarts House\n".to_string();
+    for (i, answer) in answers.iter().enumerate() {
+        content = format!("{}{},{:?}\n", content, i, *answer);
+    }
+    let filename = "resources/houses.csv";
+    let mut file = File::create(Path::new(filename)).expect("Cannot create houses.csv");
+    match file.write_all(content.as_bytes()) {
+        Ok(_x) => println!("Wrote {}", filename),
+        Err(_e) => panic!("Cannot write houses.csv"),
+    }
+}
+
+fn compare_scores(scores: &Vec<f64>) -> House {
+    let mut tmp = 0.0;
+    let mut index = 0;
+    for (i, score) in scores.iter().enumerate() {
+        if *score > tmp {
+            tmp = *score;
+            index = i;
+        }
+    }
+
+    match index {
+        0 => Gryffindor,
+        1 => Slytherin,
+        2 => Ravenclaw,
+        3 => Hufflepuff,
+        _ => panic!("should not be able to obtain that index"),
     }
 }
 
