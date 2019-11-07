@@ -5,15 +5,18 @@ use crate::student::House::{Gryffindor, Slytherin, Ravenclaw, Hufflepuff};
 use std::fs::File;
 use std::path::Path;
 use std::io::Write;
+use crate::train::feature_scaling;
 
 pub fn predict(students: Vec<Student>) {
     let weights = get_weights_file_content();
     let mut answers = Vec::new();
+    let normed = feature_scaling(&students);
     for student in students {
         let mut scores = vec![0.0; 4];
         for k in 0..House::iter().len() {
             scores[k] = h(&weights[k], &student);
         }
+        println!("{:?}", scores);
         answers.push(compare_scores(&scores));
     }
     write_csv(&answers)
@@ -52,15 +55,13 @@ fn compare_scores(scores: &Vec<f64>) -> House {
 }
 
 fn sigmoid(z: f64) -> f64 {
-    1.0 / (1.0 + (z * -1.0).exp())
+    1.0 / (1.0 + (-z).exp())
 }
 
 pub fn h(thetas: &Vec<f64>, student: &Student) -> f64 {
     let mut result = thetas[0];
-    let mut i = 1;
-    for ft in Features::iter() {
-        result += ft.func()(&student) * thetas[i];
-        i += 1;
+    for (i, ft) in Features::iter().enumerate() {
+        result += ft.func()(&student) * thetas[i+1];
     }
     sigmoid(result)
 }

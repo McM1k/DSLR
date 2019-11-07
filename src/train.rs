@@ -11,8 +11,8 @@ use std::path::Path;
 pub fn train(students: Vec<Student>) {
     let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
-    let epochs = 10_000;
-    let normed = feature_scaling(students);
+    let epochs = 2_000;
+    let normed = feature_scaling(&students);
     let mut loss_data = vec![Vec::new(); 4];
     let mut percent = 0;
     let part = epochs / 100;
@@ -30,7 +30,7 @@ pub fn train(students: Vec<Student>) {
         }
     }
     plot_loss(&loss_data);
-    to_csv(weights);
+    to_csv(unnormalize_weights(&weights, &students));
 }
 
 fn to_csv(weights: Vec<Vec<f64>>) {
@@ -67,13 +67,42 @@ fn to_csv(weights: Vec<Vec<f64>>) {
 //    washed
 //}
 
-fn feature_scaling(students: Vec<Student>) -> Vec<Student> {
-    //let mut washed = wash_data(students);
-    let mut normed = students.clone();
-
+fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
+    let mut vec = Vec::new();
     for ft in Features::iter() {
         let grades = feature_to_grades(students.clone(), ft.clone());
-        let xrange = get_minmax(&grades);
+        vec.push(get_minmax(&grades));
+    }
+    vec
+}
+
+fn unnormalize_weights(normed: &Vec<Vec<f64>>, students: &Vec<Student>) -> Vec<Vec<f64>> {
+    let mut weights = Vec::new();
+    let ranges = get_ranges(students);
+
+    for normed_thetas in normed {
+        let mut thetas = Vec::new();
+        for (i, th) in normed_thetas.iter().enumerate() {
+            if i == 0 {
+                thetas.push(*th);
+            }
+            else {
+                thetas.push(th / ranges[i-1].1 - ranges[i-1].0);
+            }
+        }
+        weights.push(thetas);
+    }
+
+    weights
+}
+
+pub fn feature_scaling(students: &Vec<Student>) -> Vec<Student> {
+    //let mut washed = wash_data(students);
+    let mut normed = students.clone();
+    let ranges = get_ranges(&students);
+
+    for (j,ft) in Features::iter().enumerate() {
+        let xrange = ranges[j];
         for i in 0..students.len() {
             normed[i].set_feature(
                 (ft.func()(&students[i]) - xrange.0) / (xrange.1 - xrange.0),
