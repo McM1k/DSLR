@@ -15,7 +15,7 @@ pub fn train(students: Vec<Student>) {
     let normed = feature_scaling(students);
     let mut loss_data = vec![Vec::new(); 4];
     let mut percent = 0;
-    let mut part = epochs / 100;
+    let part = epochs / 100;
 
     for epoch in 0..epochs {
         for (k, house) in House::iter().enumerate() {
@@ -51,21 +51,21 @@ fn to_csv(weights: Vec<Vec<f64>>) {
     }
 }
 
-fn wash_data(students: Vec<Student>) -> Vec<Student> {
-    let mut washed = Vec::new();
-    for student in students {
-        let mut contains_zero = false;
-        for ft in Features::iter() {
-            if ft.func()(&student) == 0.0 {
-                contains_zero = true;
-            }
-        }
-        if !contains_zero {
-            washed.push(student.clone())
-        }
-    }
-    washed
-}
+//fn wash_data(students: Vec<Student>) -> Vec<Student> {
+//    let mut washed = Vec::new();
+//    for student in students {
+//        let mut contains_zero = false;
+//        for ft in Features::iter() {
+//            if ft.func()(&student) == 0.0 {
+//                contains_zero = true;
+//            }
+//        }
+//        if !contains_zero {
+//            washed.push(student.clone())
+//        }
+//    }
+//    washed
+//}
 
 fn feature_scaling(students: Vec<Student>) -> Vec<Student> {
     //let mut washed = wash_data(students);

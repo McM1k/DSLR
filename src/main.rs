@@ -1,5 +1,4 @@
 mod describe;
-mod new_student;
 mod options;
 mod parser;
 mod plot;

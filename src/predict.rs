@@ -11,8 +11,8 @@ pub fn predict(students: Vec<Student>) {
     let mut answers = Vec::new();
     for student in students {
         let mut scores = vec![0.0; 4];
-        for k in House::iter().len() {
-            scores[k] = h(weights[k], &student);
+        for k in 0..House::iter().len() {
+            scores[k] = h(&weights[k], &student);
         }
         answers.push(compare_scores(&scores));
     }

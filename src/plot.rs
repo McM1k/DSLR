@@ -69,8 +69,8 @@ pub fn plot_loss(data: &Vec<Vec<(f64, f64)>>) {
 }
 
 pub fn scatter(students: Vec<Student>) {
-    let ft1 = Defense;
-    let ft2 = Astronomy;
+    let ft1 = Arithmancy;
+    let ft2 = Creatures;
 
     let s = get_scatters_feature(students, ft1.clone(), ft2.clone());
 
@@ -130,16 +130,14 @@ pub fn pair(filename: &str) {
     locals
         .set_item(py, "file", filename)
         .expect("Cannot give the file to python");
-    let code = "\
-    data = pd.read_csv(file)\
-    lines = [\"Arithmancy\", \"Astronomy\", \"Herbology\", \"Defense Against the Dark Arts\", \"Divination\", \"Muggle Studies\", \"Ancient Runes\", \"History of Magic\", \"Transfiguration\", \"Potions\", \"Care of Magical Creatures\", \"Charms\", \"Flying\"]\
-    pal = dict(Gryffindor=\"red\", Hufflepuff=\"yellow\", Slytherin=\"green\", Ravenclaw=\"blue\")\
-    g = sns.PairGrid(data, vars=lines, hue=\"Hogwarts House\", palette=pal, height=2, dropna=True)\
-    g.map_lower(plt.scatter, alpha=0.2)\
-    g.map_diag(plt.scatter, alpha=0.6)\
-    g.add_legend()\
-    plt.savefig(\"pair.svg\", format=\"svg\")\
-    plt.show()\
+    let code = "data = pd.read_csv(file)\n\
+    lines = [\"Arithmancy\", \"Astronomy\", \"Herbology\", \"Defense Against the Dark Arts\", \"Divination\", \"Muggle Studies\", \"Ancient Runes\", \"History of Magic\", \"Transfiguration\", \"Potions\", \"Care of Magical Creatures\", \"Charms\", \"Flying\"]\n\
+    pal = dict(Gryffindor=\"red\", Hufflepuff=\"yellow\", Slytherin=\"green\", Ravenclaw=\"blue\")\n\
+    g = sns.PairGrid(data, vars=lines, hue=\"Hogwarts House\", palette=pal, height=2, dropna=True)\n\
+    g.map_lower(plt.scatter, alpha=0.2)\n\
+    g.map_diag(plt.hist, alpha=0.6)\n\
+    g.add_legend()\n\
+    plt.savefig(\"pair.svg\", format=\"svg\")\n\
     ";
     py.run(code, None, Some(&locals))
         .expect("Cannot run python code");
