@@ -5,12 +5,10 @@ use crate::student::House::{Gryffindor, Slytherin, Ravenclaw, Hufflepuff};
 use std::fs::File;
 use std::path::Path;
 use std::io::Write;
-use crate::train::feature_scaling;
 
 pub fn predict(students: Vec<Student>) {
     let weights = get_weights_file_content();
     let mut answers = Vec::new();
-    let normed = feature_scaling(&students);
     for student in students {
         let mut scores = vec![0.0; 4];
         for k in 0..House::iter().len() {

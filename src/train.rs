@@ -11,8 +11,9 @@ use std::path::Path;
 pub fn train(students: Vec<Student>) {
     let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
-    let epochs = 2_000;
-    let normed = feature_scaling(&students);
+    let epochs = 500;
+    let ranges = get_ranges(&students);
+    let normed = feature_scaling(&students, &ranges);
     let mut loss_data = vec![Vec::new(); 4];
     let mut percent = 0;
     let part = epochs / 100;
@@ -30,7 +31,7 @@ pub fn train(students: Vec<Student>) {
         }
     }
     plot_loss(&loss_data);
-    to_csv(unnormalize_weights(&weights, &students));
+    to_csv(unnormalize_weights(&weights, &ranges));
 }
 
 fn to_csv(weights: Vec<Vec<f64>>) {
@@ -76,9 +77,8 @@ fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
     vec
 }
 
-fn unnormalize_weights(normed: &Vec<Vec<f64>>, students: &Vec<Student>) -> Vec<Vec<f64>> {
+fn unnormalize_weights(normed: &Vec<Vec<f64>>, ranges: &Vec<(f64, f64)>) -> Vec<Vec<f64>> {
     let mut weights = Vec::new();
-    let ranges = get_ranges(students);
 
     for normed_thetas in normed {
         let mut thetas = Vec::new();
@@ -87,7 +87,7 @@ fn unnormalize_weights(normed: &Vec<Vec<f64>>, students: &Vec<Student>) -> Vec<V
                 thetas.push(*th);
             }
             else {
-                thetas.push(th / ranges[i-1].1 - ranges[i-1].0);
+                thetas.push(th * (ranges[i-1].1 - ranges[i-1].0) + ranges[i-1].0);
             }
         }
         weights.push(thetas);
@@ -96,10 +96,8 @@ fn unnormalize_weights(normed: &Vec<Vec<f64>>, students: &Vec<Student>) -> Vec<V
     weights
 }
 
-pub fn feature_scaling(students: &Vec<Student>) -> Vec<Student> {
-    //let mut washed = wash_data(students);
+pub fn feature_scaling(students: &Vec<Student>, ranges: &Vec<(f64, f64)>) -> Vec<Student> {
     let mut normed = students.clone();
-    let ranges = get_ranges(&students);
 
     for (j,ft) in Features::iter().enumerate() {
         let xrange = ranges[j];
