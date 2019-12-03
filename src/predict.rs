@@ -1,7 +1,7 @@
 use crate::strum::IntoEnumIterator;
 use crate::student::{Features, House, Student};
 use crate::parser::get_weights_file_content;
-use crate::student::House::{Gryffindor, Slytherin, Ravenclaw, Hufflepuff};
+use crate::student::House::*;
 use std::fs::File;
 use std::path::Path;
 use std::io::Write;

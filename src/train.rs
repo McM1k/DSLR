@@ -82,12 +82,14 @@ fn unnormalize_weights(normed: &Vec<Vec<f64>>, ranges: &Vec<(f64, f64)>) -> Vec<
 
     for normed_thetas in normed {
         let mut thetas = Vec::new();
+
         for (i, th) in normed_thetas.iter().enumerate() {
             if i == 0 {
                 thetas.push(*th);
             }
             else {
-                thetas.push(th * (ranges[i-1].1 - ranges[i-1].0) + ranges[i-1].0);
+                thetas[0] -= *th * ranges[i-1].0 / (ranges[i-1].1 - ranges[i-1].0);
+                thetas.push(*th / (ranges[i-1].1 - ranges[i-1].0));
             }
         }
         weights.push(thetas);
@@ -131,7 +133,7 @@ pub fn loss(thetas: &Vec<f64>, students: &Vec<Student>, house: &House) -> f64 {
         let y = is_good_house(&x, &house);
         sum += y * (h(&thetas, &x)).log10() + (1.0 - y) * (1.0 - h(&thetas, &x)).log10()
     }
-    (-1.0 / m as f64) * sum
+    sum / m as f64
 }
 
 pub fn deriv(
@@ -140,13 +142,19 @@ pub fn deriv(
     house: &House,
     func: fn(&Student) -> f64,
 ) -> f64 {
+    let count = 0.0;
     let m = students.len();
     let mut sum = 0.0;
     for x in students {
+       // if func(&x) == 0.0 {
+      //      count += 1.0;
+       // }
+      //  else {
         let y = is_good_house(&x, &house);
         sum += (h(&thetas, &x) - y) * func(&x);
+      //  }
     }
-    (-1.0 / m as f64) * sum
+    sum / (m as f64 - count)
 }
 
 fn is_good_house(student: &Student, house: &House) -> f64 {
