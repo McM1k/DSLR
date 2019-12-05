@@ -19,7 +19,7 @@ fn main() {
         Args::Visualize(filename, visu) => {
             let data = parser::get_train_file_content(filename.clone());
             match visu {
-                Visu::Describe => describe::describe(data.clone()),
+                Visu::Describe => describe::describe(&data),
                 Visu::Histogram => plot::histogram(data.clone()),
                 Visu::Scatter => plot::scatter(data.clone()),
                 Visu::Pair => plot::pair(&filename),

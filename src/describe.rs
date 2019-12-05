@@ -24,20 +24,20 @@ impl fmt::Display for FeatureData {
     }
 }
 
-pub fn describe(students: Vec<Student>) {
-    let arithmancy = get_feature_data(students.clone(), Arithmancy);
-    let astronomy = get_feature_data(students.clone(), Astronomy);
-    let herbology = get_feature_data(students.clone(), Herbology);
-    let defense = get_feature_data(students.clone(), Defense);
-    let divination = get_feature_data(students.clone(), Divination);
-    let muggle = get_feature_data(students.clone(), Muggle);
-    let runes = get_feature_data(students.clone(), Runes);
-    let history = get_feature_data(students.clone(), History);
-    let transfig = get_feature_data(students.clone(), Transfiguration);
-    let potions = get_feature_data(students.clone(), Potions);
-    let creatures = get_feature_data(students.clone(), Creatures);
-    let charms = get_feature_data(students.clone(), Charms);
-    let flying = get_feature_data(students.clone(), Flying);
+pub fn describe(students: &Vec<Student>) {
+    let arithmancy = get_feature_data(students, &Arithmancy);
+    let astronomy = get_feature_data(students, &Astronomy);
+    let herbology = get_feature_data(students, &Herbology);
+    let defense = get_feature_data(students, &Defense);
+    let divination = get_feature_data(students, &Divination);
+    let muggle = get_feature_data(students, &Muggle);
+    let runes = get_feature_data(students, &Runes);
+    let history = get_feature_data(students, &History);
+    let transfig = get_feature_data(students, &Transfiguration);
+    let potions = get_feature_data(students, &Potions);
+    let creatures = get_feature_data(students, &Creatures);
+    let charms = get_feature_data(students, &Charms);
+    let flying = get_feature_data(students, &Flying);
 
     println!(
         "{:11} : {:>6}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}",
@@ -66,14 +66,14 @@ pub fn describe(students: Vec<Student>) {
     println!("{:11} : {}", "flying", flying);
 }
 
-pub fn get_feature_data(students: Vec<Student>, feature: Features) -> FeatureData {
+pub fn get_feature_data(students: &Vec<Student>, feature: &Features) -> FeatureData {
     let values = select::with_sorted_grades(students, feature);
-    let quartiles = quartiles(values.clone());
+    let quartiles = quartiles(&values);
 
     FeatureData {
-        count: count(values.clone()),
-        mean: mean(values.clone()),
-        std: std(values),
+        count: count(&values),
+        mean: mean(&values),
+        std: std(&values),
         min: quartiles.0,
         q1: quartiles.1,
         q2: quartiles.2,
@@ -82,11 +82,11 @@ pub fn get_feature_data(students: Vec<Student>, feature: Features) -> FeatureDat
     }
 }
 
-pub fn count(values: Vec<f64>) -> usize {
+pub fn count(values: &Vec<f64>) -> usize {
     values.len()
 }
 
-pub fn mean(values: Vec<f64>) -> f64 {
+pub fn mean(values: &Vec<f64>) -> f64 {
     //moyenne
     let mut sum = 0.0;
     for value in values.clone() {
@@ -95,8 +95,8 @@ pub fn mean(values: Vec<f64>) -> f64 {
     sum / count(values) as f64
 }
 
-pub fn variance(values: Vec<f64>) -> f64 {
-    let mean = mean(values.clone());
+pub fn variance(values: &Vec<f64>) -> f64 {
+    let mean = mean(values);
     let sq_mean = mean * mean;
     let mut sum = 0.0;
 
@@ -107,8 +107,8 @@ pub fn variance(values: Vec<f64>) -> f64 {
     sum / count(values) as f64
 }
 
-pub fn std(values: Vec<f64>) -> f64 {
-    //ecart-type == standard variation
+pub fn std(values: &Vec<f64>) -> f64 {
+    //ecart-type == standard variation/deviation
     variance(values).sqrt()
 }
 
@@ -131,13 +131,13 @@ pub fn get_minmax(values: &Vec<f64>) -> (f64, f64) {
     (min, max)
 }
 
-pub fn range_minmax(sorted: Vec<f64>) -> f64 {
+pub fn range_minmax(sorted: &Vec<f64>) -> f64 {
     let (min, _, _, _, max) = quartiles(sorted);
     max - min
 }
 
-pub fn quartiles(sorted: Vec<f64>) -> (f64, f64, f64, f64, f64) {
-    let count = count(sorted.clone());
+pub fn quartiles(sorted: &Vec<f64>) -> (f64, f64, f64, f64, f64) {
+    let count = count(sorted);
     (
         sorted[0],
         sorted[count / 4],

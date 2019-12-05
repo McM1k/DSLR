@@ -1,4 +1,4 @@
-use crate::describe::get_minmax;
+use crate::describe::*;
 use crate::plot::plot_loss;
 use crate::predict::*;
 use crate::select::feature_to_grades;
@@ -11,9 +11,10 @@ use std::path::Path;
 pub fn train(students: Vec<Student>) {
     let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
-    let epochs = 500;
-    let ranges = get_ranges(&students);
-    let normed = feature_scaling(&students, &ranges);
+    let epochs = 2000;
+    //let ranges = get_ranges(&students);
+    //let normed = feature_scaling(&students, &ranges);
+    let normed = standard_score(&students);
     let mut loss_data = vec![Vec::new(); 4];
     let mut percent = 0;
     let part = epochs / 100;
@@ -30,8 +31,9 @@ pub fn train(students: Vec<Student>) {
             weights[k] = thetas_by_epoch(&normed, &house, &weights[k]);
         }
     }
-    plot_loss(&loss_data);
-    to_csv(unnormalize_weights(&weights, &ranges));
+    //plot_loss(&loss_data);
+    //to_csv(unnormalize_weights(&weights, &ranges));
+    to_csv(weights);
 }
 
 fn to_csv(weights: Vec<Vec<f64>>) {
@@ -71,7 +73,7 @@ fn to_csv(weights: Vec<Vec<f64>>) {
 fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
     let mut vec = Vec::new();
     for ft in Features::iter() {
-        let grades = feature_to_grades(students.clone(), ft.clone());
+        let grades = feature_to_grades(students, &ft);
         vec.push(get_minmax(&grades));
     }
     vec
@@ -98,16 +100,35 @@ fn unnormalize_weights(normed: &Vec<Vec<f64>>, ranges: &Vec<(f64, f64)>) -> Vec<
     weights
 }
 
+pub fn standard_score(students: &Vec<Student>) -> Vec<Student>{
+    let mut normed = students.clone();
+
+    for ft in Features::iter() {
+        let grades = feature_to_grades(students,&ft);
+        let mean = mean(&grades);
+        let std = std(&grades);
+
+        for (i, student) in students.iter().enumerate() {
+            normed[i].set_feature(
+                (ft.func()(student) - mean) / std,
+                &ft,
+            );
+        }
+    }
+
+    normed
+}
+
 pub fn feature_scaling(students: &Vec<Student>, ranges: &Vec<(f64, f64)>) -> Vec<Student> {
     let mut normed = students.clone();
 
     for (j,ft) in Features::iter().enumerate() {
         let xrange = ranges[j];
-        for i in 0..students.len() {
+        for (i, student) in students.iter().enumerate() {
             normed[i].set_feature(
-                (ft.func()(&students[i]) - xrange.0) / (xrange.1 - xrange.0),
+                (ft.func()(student) - xrange.0) / (xrange.1 - xrange.0),
                 &ft,
-            )
+            );
         }
     }
 
@@ -116,12 +137,14 @@ pub fn feature_scaling(students: &Vec<Student>, ranges: &Vec<(f64, f64)>) -> Vec
 
 fn thetas_by_epoch(students: &Vec<Student>, house: &House, thetas: &Vec<f64>) -> Vec<f64> {
     let mut tmp = thetas.clone();
-    tmp[0] += deriv(&thetas, &students, &house, |_s| 1.0);
 
-    let mut i = 1;
-    for ft in Features::iter() {
-        tmp[i] += deriv(&thetas, &students, &house, ft.func());
-        i += 1;
+    for (i, ft) in Features::iter().enumerate() {
+        if i == 0 {
+            tmp[i] += deriv(&thetas, &students, &house, |_s| 1.0);
+        }
+        else {
+            tmp[i] += deriv(&thetas, &students, &house, ft.func());
+        }
     }
     tmp
 }

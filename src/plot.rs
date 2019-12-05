@@ -3,8 +3,8 @@ use crate::student::Features::*;
 use crate::student::House::*;
 use crate::student::{Features, House, Student};
 use strum::IntoEnumIterator;
-extern crate cpython;
-use cpython::{PyDict, Python};
+//extern crate cpython;
+//use cpython::{PyDict, Python};
 use plotlib::histogram::{Bins, Histogram};
 use plotlib::page::Page;
 use plotlib::scatter::Scatter;
@@ -33,7 +33,7 @@ fn get_histos_feature(students: Vec<Student>, feature: Features) -> Vec<Histogra
     let mut vec = Vec::new();
 
     for house in House::iter() {
-        let g = with_sorted_grades(with_house(students.clone(), house.clone()), feature.clone());
+        let g = with_sorted_grades(&with_house(&students, &house), &feature);
 
         let h = Histogram::from_slice(&g, Bins::Count(40))
             .style(&histogram::Style::new().fill(house.clone().colour()));
@@ -92,7 +92,7 @@ fn get_scatters_feature(students: Vec<Student>, ft1: Features, ft2: Features) ->
     let mut vec = Vec::new();
 
     for house in House::iter() {
-        let g = features_to_grade_tuples(house.clone(), students.clone(), ft1.clone(), ft2.clone());
+        let g = features_to_grade_tuples(&house, &students, &ft1, &ft2);
 
         let s = Scatter::from_slice(&g).style(
             &scatter::Style::new()
