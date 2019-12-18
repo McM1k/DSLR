@@ -5,11 +5,14 @@ use crate::student::House::*;
 use std::fs::File;
 use std::path::Path;
 use std::io::Write;
+use crate::train::*;
 
 pub fn predict(students: Vec<Student>) {
-    let weights = get_weights_file_content();
+    let (weights, denorm_params) = get_weights_file_content();
     let mut answers = Vec::new();
-    for student in students {
+    //let normed = feature_scaling(&students, &denorm_params);
+    let normed = standard_score(&students, &denorm_params);
+    for student in normed {
         let mut scores = vec![0.0; 4];
         for k in 0..House::iter().len() {
             scores[k] = h(&weights[k], &student);
@@ -62,4 +65,5 @@ pub fn h(thetas: &Vec<f64>, student: &Student) -> f64 {
         result += ft.func()(&student) * thetas[i+1];
     }
     sigmoid(result)
+    //result
 }

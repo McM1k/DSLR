@@ -11,13 +11,15 @@ use std::path::Path;
 pub fn train(students: Vec<Student>) {
     let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
-    let epochs = 2000;
-    //let ranges = get_ranges(&students);
-    //let normed = feature_scaling(&students, &ranges);
-    let normed = standard_score(&students);
+    let epochs = 500;
+    //let denorm_params = get_ranges(&students);
+    //let normed = feature_scaling(&students, &denorm_params);
+    let denorm_params = get_means_std(&students);
+    let normed = standard_score(&students, &denorm_params);
     let mut loss_data = vec![Vec::new(); 4];
     let mut percent = 0;
     let part = epochs / 100;
+    let rate = 1.0;
 
     for epoch in 0..epochs {
         for (k, house) in House::iter().enumerate() {
@@ -28,17 +30,18 @@ pub fn train(students: Vec<Student>) {
                 }
                 loss_data[k].push((f64::from(epoch), loss(&weights[k], &normed, &house)));
             }
-            weights[k] = thetas_by_epoch(&normed, &house, &weights[k]);
+            weights[k] = thetas_by_epoch(&rate, &normed, &house, &weights[k]);
         }
     }
     //plot_loss(&loss_data);
     //to_csv(unnormalize_weights(&weights, &ranges));
-    to_csv(weights);
+    to_csv(weights, &denorm_params);
 }
 
-fn to_csv(weights: Vec<Vec<f64>>) {
+fn to_csv(weights: Vec<Vec<f64>>, denorm_params: &Vec<(f64, f64)>) {
     let mut content =
         "Index,th0,th1,th2,th3,th4,th5,th6,th7,th8,th9,th10,th11,th12,th13\n".to_string();
+
     for (i, thetas) in weights.iter().enumerate() {
         content = format!("{}{}", content, i);
         for th in thetas.clone() {
@@ -46,6 +49,16 @@ fn to_csv(weights: Vec<Vec<f64>>) {
         }
         content = format!("{}\n", content);
     }
+    content = format!("{}{},0.0", content, 4);
+    for (x, _y) in denorm_params {
+        content = format!("{},{}", content, x);
+    }
+    content = format!("{}\n{},0.0", content, 5);
+    for (_x, y) in denorm_params {
+        content = format!("{},{}", content, y);
+    }
+    content = format!("{}\n", content);
+
     let filename = "resources/weights.csv";
     let mut file = File::create(Path::new(filename)).expect("Cannot create weights.csv");
     match file.write_all(content.as_bytes()) {
@@ -70,12 +83,14 @@ fn to_csv(weights: Vec<Vec<f64>>) {
 //    washed
 //}
 
-fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
+pub fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
     let mut vec = Vec::new();
+
     for ft in Features::iter() {
         let grades = feature_to_grades(students, &ft);
         vec.push(get_minmax(&grades));
     }
+
     vec
 }
 
@@ -100,13 +115,22 @@ fn unnormalize_weights(normed: &Vec<Vec<f64>>, ranges: &Vec<(f64, f64)>) -> Vec<
     weights
 }
 
-pub fn standard_score(students: &Vec<Student>) -> Vec<Student>{
-    let mut normed = students.clone();
+pub fn get_means_std(students: &Vec<Student>) -> Vec<(f64, f64)> {
+    let mut vec = Vec::new();
 
     for ft in Features::iter() {
-        let grades = feature_to_grades(students,&ft);
-        let mean = mean(&grades);
-        let std = std(&grades);
+        let grades = feature_to_grades(students, &ft);
+        vec.push((mean(&grades), std(&grades)));
+    }
+
+    vec
+}
+
+pub fn standard_score(students: &Vec<Student>, means_std: &Vec<(f64, f64)>) -> Vec<Student>{
+    let mut normed = students.clone();
+
+    for (j, ft) in Features::iter().enumerate() {
+        let (mean, std) = means_std[j];
 
         for (i, student) in students.iter().enumerate() {
             normed[i].set_feature(
@@ -135,17 +159,14 @@ pub fn feature_scaling(students: &Vec<Student>, ranges: &Vec<(f64, f64)>) -> Vec
     normed
 }
 
-fn thetas_by_epoch(students: &Vec<Student>, house: &House, thetas: &Vec<f64>) -> Vec<f64> {
+fn thetas_by_epoch(rate: &f64, students: &Vec<Student>, house: &House, thetas: &Vec<f64>) -> Vec<f64> {
     let mut tmp = thetas.clone();
 
-    for (i, ft) in Features::iter().enumerate() {
-        if i == 0 {
-            tmp[i] += deriv(&thetas, &students, &house, |_s| 1.0);
-        }
-        else {
-            tmp[i] += deriv(&thetas, &students, &house, ft.func());
-        }
+    tmp[0] -= rate * deriv(&thetas, &students, &house, |_s| 1.0);
+    for (i, ft) in Features::iter().enumerate(){
+        tmp[i + 1] -= rate * deriv(&thetas, &students, &house, ft.func());
     }
+
     tmp
 }
 
@@ -168,14 +189,10 @@ pub fn deriv(
     let count = 0.0;
     let m = students.len();
     let mut sum = 0.0;
+
     for x in students {
-       // if func(&x) == 0.0 {
-      //      count += 1.0;
-       // }
-      //  else {
         let y = is_good_house(&x, &house);
         sum += (h(&thetas, &x) - y) * func(&x);
-      //  }
     }
     sum / (m as f64 - count)
 }
@@ -185,5 +202,67 @@ fn is_good_house(student: &Student, house: &House) -> f64 {
         1.0
     } else {
         0.0
+    }
+}
+
+
+#[cfg(test)]
+mod train_tests{
+    mod is_good_house{
+        use crate::train::is_good_house;
+        use crate::student::*;
+        use chrono::NaiveDate;
+
+        #[test]
+        fn good_house(){
+            let student = Student{
+                house: House::Gryffindor,
+                first_name: "".to_string(),
+                last_name: "".to_string(),
+                birthday: NaiveDate::from_num_days_from_ce(0),
+                best_hand: Hand::Left,
+                arithmancy: 0.0,
+                astronomy: 0.0,
+                herbology: 0.0,
+                defense: 0.0,
+                divination: 0.0,
+                muggle: 0.0,
+                runes: 0.0,
+                history: 0.0,
+                transfiguration: 0.0,
+                potions: 0.0,
+                creatures: 0.0,
+                charms: 0.0,
+                flying: 0.0
+            };
+
+            assert_eq!(is_good_house(&student, &House::Gryffindor), 1.0);
+        }
+
+        #[test]
+        fn wrong_house(){
+            let student = Student{
+                house: House::Hufflepuff,
+                first_name: "".to_string(),
+                last_name: "".to_string(),
+                birthday: NaiveDate::from_num_days_from_ce(0),
+                best_hand: Hand::Left,
+                arithmancy: 0.0,
+                astronomy: 0.0,
+                herbology: 0.0,
+                defense: 0.0,
+                divination: 0.0,
+                muggle: 0.0,
+                runes: 0.0,
+                history: 0.0,
+                transfiguration: 0.0,
+                potions: 0.0,
+                creatures: 0.0,
+                charms: 0.0,
+                flying: 0.0
+            };
+
+            assert_eq!(is_good_house(&student, &House::Gryffindor), 0.0);
+        }
     }
 }
