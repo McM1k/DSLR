@@ -3,8 +3,8 @@ use crate::student::Features::*;
 use crate::student::House::*;
 use crate::student::{Features, House, Student};
 use strum::IntoEnumIterator;
-//extern crate cpython;
-//use cpython::{PyDict, Python};
+extern crate cpython;
+use cpython::{PyDict, Python};
 use plotlib::histogram::{Bins, Histogram};
 use plotlib::page::Page;
 use plotlib::scatter::Scatter;
@@ -44,7 +44,7 @@ fn get_histos_feature(students: Vec<Student>, feature: Features) -> Vec<Histogra
     vec
 }
 
-pub fn plot_loss(data: &Vec<Vec<(f64, f64)>>) {
+pub fn plot_loss(data: &[Vec<(f64, f64)>]) {
     let gryf = Scatter::from_slice(&data[0])
         .style(&scatter::Style::new().size(2.0).colour(Gryffindor.colour()));
     let slyt = Scatter::from_slice(&data[1])
@@ -105,7 +105,7 @@ fn get_scatters_feature(students: Vec<Student>, ft1: Features, ft2: Features) ->
     vec
 }
 
-pub fn pair(filename: &str) {/*
+pub fn pair(filename: &str) {
     let gil = Python::acquire_gil();
     let py = gil.python();
     let locals = PyDict::new(py);
@@ -141,5 +141,5 @@ pub fn pair(filename: &str) {/*
     ";
     py.run(code, None, Some(&locals))
         .expect("Cannot run python code");
-    println!("Wrote pair.svg!");*/
+    println!("Wrote pair.svg!");
 }

@@ -12,8 +12,6 @@ pub fn train(students: Vec<Student>) {
     let thetas = vec![0.0; 14];
     let mut weights = vec![thetas.clone(); 4];
     let epochs = 500;
-    //let denorm_params = get_ranges(&students);
-    //let normed = feature_scaling(&students, &denorm_params);
     let denorm_params = get_means_std(&students);
     let normed = standard_score(&students, &denorm_params);
     let mut loss_data = vec![Vec::new(); 4];
@@ -30,15 +28,14 @@ pub fn train(students: Vec<Student>) {
                 }
                 loss_data[k].push((f64::from(epoch), loss(&weights[k], &normed, &house)));
             }
-            weights[k] = thetas_by_epoch(&rate, &normed, &house, &weights[k]);
+            weights[k] = thetas_by_epoch(rate, &normed, &house, &weights[k]);
         }
     }
-    //plot_loss(&loss_data);
-    //to_csv(unnormalize_weights(&weights, &ranges));
+    plot_loss(&loss_data);
     to_csv(weights, &denorm_params);
 }
 
-fn to_csv(weights: Vec<Vec<f64>>, denorm_params: &Vec<(f64, f64)>) {
+fn to_csv(weights: Vec<Vec<f64>>, denorm_params: &[(f64, f64)]) {
     let mut content =
         "Index,th0,th1,th2,th3,th4,th5,th6,th7,th8,th9,th10,th11,th12,th13\n".to_string();
 
@@ -67,55 +64,7 @@ fn to_csv(weights: Vec<Vec<f64>>, denorm_params: &Vec<(f64, f64)>) {
     }
 }
 
-//fn wash_data(students: Vec<Student>) -> Vec<Student> {
-//    let mut washed = Vec::new();
-//    for student in students {
-//        let mut contains_zero = false;
-//        for ft in Features::iter() {
-//            if ft.func()(&student) == 0.0 {
-//                contains_zero = true;
-//            }
-//        }
-//        if !contains_zero {
-//            washed.push(student.clone())
-//        }
-//    }
-//    washed
-//}
-
-pub fn get_ranges(students: &Vec<Student>) -> Vec<(f64, f64)> {
-    let mut vec = Vec::new();
-
-    for ft in Features::iter() {
-        let grades = feature_to_grades(students, &ft);
-        vec.push(get_minmax(&grades));
-    }
-
-    vec
-}
-
-fn unnormalize_weights(normed: &Vec<Vec<f64>>, ranges: &Vec<(f64, f64)>) -> Vec<Vec<f64>> {
-    let mut weights = Vec::new();
-
-    for normed_thetas in normed {
-        let mut thetas = Vec::new();
-
-        for (i, th) in normed_thetas.iter().enumerate() {
-            if i == 0 {
-                thetas.push(*th);
-            }
-            else {
-                thetas[0] -= *th * ranges[i-1].0 / (ranges[i-1].1 - ranges[i-1].0);
-                thetas.push(*th / (ranges[i-1].1 - ranges[i-1].0));
-            }
-        }
-        weights.push(thetas);
-    }
-
-    weights
-}
-
-pub fn get_means_std(students: &Vec<Student>) -> Vec<(f64, f64)> {
+pub fn get_means_std(students: &[Student]) -> Vec<(f64, f64)> {
     let mut vec = Vec::new();
 
     for ft in Features::iter() {
@@ -126,51 +75,32 @@ pub fn get_means_std(students: &Vec<Student>) -> Vec<(f64, f64)> {
     vec
 }
 
-pub fn standard_score(students: &Vec<Student>, means_std: &Vec<(f64, f64)>) -> Vec<Student>{
-    let mut normed = students.clone();
+pub fn standard_score(students: &[Student], means_std: &[(f64, f64)]) -> Vec<Student> {
+    let mut normed = students.to_vec().clone();
 
     for (j, ft) in Features::iter().enumerate() {
         let (mean, std) = means_std[j];
 
         for (i, student) in students.iter().enumerate() {
-            normed[i].set_feature(
-                (ft.func()(student) - mean) / std,
-                &ft,
-            );
+            normed[i].set_feature((ft.func()(student) - mean) / std, &ft);
         }
     }
 
     normed
 }
 
-pub fn feature_scaling(students: &Vec<Student>, ranges: &Vec<(f64, f64)>) -> Vec<Student> {
-    let mut normed = students.clone();
-
-    for (j,ft) in Features::iter().enumerate() {
-        let xrange = ranges[j];
-        for (i, student) in students.iter().enumerate() {
-            normed[i].set_feature(
-                (ft.func()(student) - xrange.0) / (xrange.1 - xrange.0),
-                &ft,
-            );
-        }
-    }
-
-    normed
-}
-
-fn thetas_by_epoch(rate: &f64, students: &Vec<Student>, house: &House, thetas: &Vec<f64>) -> Vec<f64> {
-    let mut tmp = thetas.clone();
+fn thetas_by_epoch(rate: f64, students: &[Student], house: &House, thetas: &[f64]) -> Vec<f64> {
+    let mut tmp = thetas.to_vec().clone();
 
     tmp[0] -= rate * deriv(&thetas, &students, &house, |_s| 1.0);
-    for (i, ft) in Features::iter().enumerate(){
+    for (i, ft) in Features::iter().enumerate() {
         tmp[i + 1] -= rate * deriv(&thetas, &students, &house, ft.func());
     }
 
-    tmp
+    tmp.to_vec()
 }
 
-pub fn loss(thetas: &Vec<f64>, students: &Vec<Student>, house: &House) -> f64 {
+pub fn loss(thetas: &[f64], students: &[Student], house: &House) -> f64 {
     let m = students.len();
     let mut sum = 0.0;
     for x in students {
@@ -181,8 +111,8 @@ pub fn loss(thetas: &Vec<f64>, students: &Vec<Student>, house: &House) -> f64 {
 }
 
 pub fn deriv(
-    thetas: &Vec<f64>,
-    students: &Vec<Student>,
+    thetas: &[f64],
+    students: &[Student],
     house: &House,
     func: fn(&Student) -> f64,
 ) -> f64 {
@@ -205,17 +135,16 @@ fn is_good_house(student: &Student, house: &House) -> f64 {
     }
 }
 
-
 #[cfg(test)]
-mod train_tests{
-    mod is_good_house{
-        use crate::train::is_good_house;
+mod train_tests {
+    mod is_good_house {
         use crate::student::*;
+        use crate::train::is_good_house;
         use chrono::NaiveDate;
 
         #[test]
-        fn good_house(){
-            let student = Student{
+        fn good_house() {
+            let student = Student {
                 house: House::Gryffindor,
                 first_name: "".to_string(),
                 last_name: "".to_string(),
@@ -233,15 +162,15 @@ mod train_tests{
                 potions: 0.0,
                 creatures: 0.0,
                 charms: 0.0,
-                flying: 0.0
+                flying: 0.0,
             };
 
             assert_eq!(is_good_house(&student, &House::Gryffindor), 1.0);
         }
 
         #[test]
-        fn wrong_house(){
-            let student = Student{
+        fn wrong_house() {
+            let student = Student {
                 house: House::Hufflepuff,
                 first_name: "".to_string(),
                 last_name: "".to_string(),
@@ -259,7 +188,7 @@ mod train_tests{
                 potions: 0.0,
                 creatures: 0.0,
                 charms: 0.0,
-                flying: 0.0
+                flying: 0.0,
             };
 
             assert_eq!(is_good_house(&student, &House::Gryffindor), 0.0);

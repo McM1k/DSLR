@@ -1,11 +1,11 @@
-use crate::strum::IntoEnumIterator;
-use crate::student::{Features, House, Student};
 use crate::parser::get_weights_file_content;
+use crate::strum::IntoEnumIterator;
 use crate::student::House::*;
-use std::fs::File;
-use std::path::Path;
-use std::io::Write;
+use crate::student::{Features, House, Student};
 use crate::train::*;
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
 
 pub fn predict(students: Vec<Student>) {
     let (weights, denorm_params) = get_weights_file_content();
@@ -23,7 +23,7 @@ pub fn predict(students: Vec<Student>) {
     write_csv(&answers)
 }
 
-fn write_csv(answers: &Vec<House>) {
+fn write_csv(answers: &[House]) {
     let mut content = "Index, Hogwarts House\n".to_string();
     for (i, answer) in answers.iter().enumerate() {
         content = format!("{}{},{:?}\n", content, i, *answer);
@@ -36,7 +36,7 @@ fn write_csv(answers: &Vec<House>) {
     }
 }
 
-fn compare_scores(scores: &Vec<f64>) -> House {
+fn compare_scores(scores: &[f64]) -> House {
     let mut tmp = 0.0;
     let mut index = 0;
     for (i, score) in scores.iter().enumerate() {
@@ -59,10 +59,10 @@ fn sigmoid(z: f64) -> f64 {
     1.0 / (1.0 + (-z).exp())
 }
 
-pub fn h(thetas: &Vec<f64>, student: &Student) -> f64 {
+pub fn h(thetas: &[f64], student: &Student) -> f64 {
     let mut result = thetas[0];
     for (i, ft) in Features::iter().enumerate() {
-        result += ft.func()(&student) * thetas[i+1];
+        result += ft.func()(&student) * thetas[i + 1];
     }
     sigmoid(result)
     //result

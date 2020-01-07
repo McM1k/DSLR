@@ -13,7 +13,14 @@ extern crate strum_macros;
 use options::{get_opt, Args, Visu};
 
 fn main() {
-    let args = get_opt();
+    let res = get_opt();
+    let args = match res {
+        Ok(a) => a,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
     match args {
         Args::Visualize(filename, visu) => {

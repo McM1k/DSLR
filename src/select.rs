@@ -1,6 +1,6 @@
 use crate::student::{Features, House, Student};
 
-pub fn with_house(students: &Vec<Student>, house: &House) -> Vec<Student> {
+pub fn with_house(students: &[Student], house: &House) -> Vec<Student> {
     let mut selected = Vec::new();
 
     for student in students {
@@ -14,7 +14,7 @@ pub fn with_house(students: &Vec<Student>, house: &House) -> Vec<Student> {
 
 pub fn features_to_grade_tuples(
     house: &House,
-    students: &Vec<Student>,
+    students: &[Student],
     feature1: &Features,
     feature2: &Features,
 ) -> Vec<(f64, f64)> {
@@ -37,14 +37,14 @@ pub fn features_to_grade_tuples(
     wash_tuple_zeros(grades)
 }
 
-pub fn with_sorted_grades(students: &Vec<Student>, feature: &Features) -> Vec<f64> {
+pub fn with_sorted_grades(students: &[Student], feature: &Features) -> Vec<f64> {
     let mut values = feature_to_grades(students, feature);
     values.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     wash_zeros(values)
 }
 
-pub fn feature_to_grades(students: &Vec<Student>, feature: &Features) -> Vec<f64> {
+pub fn feature_to_grades(students: &[Student], feature: &Features) -> Vec<f64> {
     students.iter().map(feature.func()).collect::<Vec<f64>>()
 }
 

@@ -24,7 +24,7 @@ impl fmt::Display for FeatureData {
     }
 }
 
-pub fn describe(students: &Vec<Student>) {
+pub fn describe(students: &[Student]) {
     let arithmancy = get_feature_data(students, &Arithmancy);
     let astronomy = get_feature_data(students, &Astronomy);
     let herbology = get_feature_data(students, &Herbology);
@@ -66,7 +66,7 @@ pub fn describe(students: &Vec<Student>) {
     println!("{:11} : {}", "flying", flying);
 }
 
-pub fn get_feature_data(students: &Vec<Student>, feature: &Features) -> FeatureData {
+pub fn get_feature_data(students: &[Student], feature: &Features) -> FeatureData {
     let values = select::with_sorted_grades(students, feature);
     let quartiles = quartiles(&values);
 
@@ -82,61 +82,37 @@ pub fn get_feature_data(students: &Vec<Student>, feature: &Features) -> FeatureD
     }
 }
 
-pub fn count(values: &Vec<f64>) -> usize {
+pub fn count(values: &[f64]) -> usize {
     values.len()
 }
 
-pub fn mean(values: &Vec<f64>) -> f64 {
+pub fn mean(values: &[f64]) -> f64 {
     //moyenne
     let mut sum = 0.0;
-    for value in values.clone() {
-        sum += value;
+    for value in values {
+        sum += *value;
     }
     sum / count(values) as f64
 }
 
-pub fn variance(values: &Vec<f64>) -> f64 {
+pub fn variance(values: &[f64]) -> f64 {
     let mean = mean(values);
     let sq_mean = mean * mean;
     let mut sum = 0.0;
 
-    for value in values.clone() {
-        sum += (value * value) - sq_mean;
+    for value in values {
+        sum += (*value * *value) - sq_mean;
     }
 
     sum / count(values) as f64
 }
 
-pub fn std(values: &Vec<f64>) -> f64 {
+pub fn std(values: &[f64]) -> f64 {
     //ecart-type == standard variation/deviation
     variance(values).sqrt()
 }
 
-pub fn get_minmax(values: &Vec<f64>) -> (f64, f64) {
-    let (mut min, mut max);
-
-    max = 0.0;
-    for value in values {
-        if max < *value {
-            max = *value;
-        }
-    }
-    min = max;
-    for value in values {
-        if min > *value {
-            min = *value;
-        }
-    }
-
-    (min, max)
-}
-
-pub fn range_minmax(sorted: &Vec<f64>) -> f64 {
-    let (min, _, _, _, max) = quartiles(sorted);
-    max - min
-}
-
-pub fn quartiles(sorted: &Vec<f64>) -> (f64, f64, f64, f64, f64) {
+pub fn quartiles(sorted: &[f64]) -> (f64, f64, f64, f64, f64) {
     let count = count(sorted);
     (
         sorted[0],

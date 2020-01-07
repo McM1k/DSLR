@@ -1,7 +1,7 @@
+use crate::student::House::Gryffindor;
 use chrono::naive::NaiveDate;
 use plotlib::style::Marker;
 use strum_macros::EnumIter;
-use crate::student::House::Gryffindor;
 
 #[derive(Clone, Debug, EnumIter, PartialEq)]
 pub enum House {

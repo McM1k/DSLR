@@ -15,7 +15,7 @@ pub enum Args {
     Predict(String),
 }
 
-pub fn get_opt() -> Args {
+pub fn get_opt() -> Result<Args, String> {
     let matches = App::new("Choipeaux v2.0")
         .author("gboudrie@student.42.fr")
         .about("Train on data, provide plots, then choose a house for your student.")
@@ -53,25 +53,25 @@ pub fn get_opt() -> Args {
         )
         .get_matches();
 
-    let mut args = Args::Predict("".to_string());
+    let args;
     let filename = matches.value_of("FILE").unwrap().to_string();
     if matches.is_present("predict") {
         args = Args::Predict(filename);
     } else if matches.is_present("train") {
         args = Args::Train(filename);
     } else if matches.is_present("visualize") {
-        let mut visu = Visu::Describe;
-        if matches.is_present("visualize") {
-            visu = match matches.value_of("visualize").unwrap() {
-                "describe" => Visu::Describe,
-                "histogram" => Visu::Histogram,
-                "scatter" => Visu::Scatter,
-                "pair" => Visu::Pair,
-                _ => Visu::Describe,
-            };
-        }
+        let visu = match matches.value_of("visualize").unwrap() {
+            "describe" => Visu::Describe,
+            "histogram" => Visu::Histogram,
+            "scatter" => Visu::Scatter,
+            "pair" => Visu::Pair,
+            _ => Visu::Describe,
+        };
         args = Args::Visualize(filename, visu);
+    } else {
+        //args = Args::Predict("".to_string());
+        return Err("-v : visualize\n-t : train\n-p : predict\n".to_string());
     }
 
-    args
+    Ok(args)
 }
